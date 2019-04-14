@@ -1,0 +1,6 @@
+- name: generage ssh keypair
+  command: ssh-keygen -t rsa -b 2048 -P "" -f ../id_rsa
+  args:
+    creates: ../id_rsa
+  tags:
+    - genkey

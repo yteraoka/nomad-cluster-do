@@ -1,0 +1,173 @@
+---
+- name: install unzip
+  yum:
+    name: unzip
+  tags:
+    - consul
+
+- name: create consul group
+  group:
+    name: consul
+  tags:
+    - consul
+
+- name: create consul user
+  user:
+    name: consul
+    group: consul
+    system: yes
+    home: /etc/consul.d
+    shell: /bin/false
+  tags:
+    - consul
+
+- name: mkdir /etc/consul.d
+  file:
+    state: directory
+    path: /etc/consul.d
+    owner: consul
+    group: consul
+    mode: "0750"
+  tags:
+    - consul
+
+- name: mkdir /opt/consul
+  file:
+    state: directory
+    path: /opt/consul
+    owner: consul
+    group: consul
+    mode: "0750"
+  tags:
+    - consul
+
+- name: download consul
+  get_url:
+    url: https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip
+    dest: /var/tmp/consul-{{ consul_version }}.zip
+  tags:
+    - consul
+
+- name: unarchive consul
+  unarchive:
+    src: /var/tmp/consul-{{ consul_version }}.zip
+    dest: /var/tmp
+    remote_src: yes
+  tags:
+    - consul
+
+- name: copy consul
+  copy:
+    src: /var/tmp/consul
+    dest: /usr/local/bin/consul
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: yes
+  tags:
+    - consul
+
+- name: copy consul.service
+  copy:
+    src: consul.service
+    dest: /etc/systemd/system/consul.service
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - consul
+
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+  tags:
+    - consul
+
+- name: copy consul.hcl
+  template:
+    src: consul.hcl
+    dest: /etc/consul.d/consul.hcl
+    owner: consul
+    group: consul
+    mode: "0640"
+  notify: restart consul
+  tags:
+    - consul
+
+- name: copy server.hcl
+  copy:
+    src: server.hcl
+    dest: /etc/consul.d/server.hcl
+    owner: consul
+    group: consul
+    mode: "0640"
+  when:
+    - is_consul_server
+  notify: restart consul
+  tags:
+    - consul
+
+- name: copy ca.pem
+  copy:
+    src: tls_files/consul-agent-ca.pem
+    dest: /etc/consul.d/ca.pem
+    owner: consul
+    group: consul
+    mode: "0644"
+  tags:
+    - consul
+
+- name: copy server cert.pem
+  copy:
+    src: tls_files/dc1-server-consul-0.pem
+    dest: /etc/consul.d/cert.pem
+    owner: consul
+    group: consul
+    mode: "0644"
+  when:
+    - is_consul_server
+  tags:
+    - consul
+
+- name: copy server key.pem
+  copy:
+    src: tls_files/dc1-server-consul-0-key.pem
+    dest: /etc/consul.d/key.pem
+    owner: consul
+    group: consul
+    mode: "0640"
+  when:
+    - is_consul_server
+  tags:
+    - consul
+
+- name: copy client cert.pem
+  copy:
+    src: tls_files/dc1-client-consul-0.pem
+    dest: /etc/consul.d/cert.pem
+    owner: consul
+    group: consul
+    mode: "0644"
+  when:
+    - not is_consul_server
+  tags:
+    - consul
+
+- name: copy client key.pem
+  copy:
+    src: tls_files/dc1-client-consul-0-key.pem
+    dest: /etc/consul.d/key.pem
+    owner: consul
+    group: consul
+    mode: "0640"
+  when:
+    - not is_consul_server
+  tags:
+    - consul
+
+- name: enable and start consul
+  service:
+    name: consul
+    state: started
+    enabled: yes
+  tags:
+    - consul

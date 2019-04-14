@@ -1,0 +1,6 @@
+- name: terraform destroy
+  terraform:
+    project_path: "../terraform"
+    state: absent
+  tags:
+    - terraform

@@ -1,0 +1,9 @@
+.terraform
+id_rsa
+id_rsa.pub
+*_encrypt_key.yml
+*.pem
+*.retry
+terraform.tfstate
+terraform.tfstate.backup
+client.pfx

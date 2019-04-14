@@ -1,0 +1,8 @@
+- name: terraform
+  hosts: localhost
+  gather_facts: yes
+  connection: local
+  tasks:
+    - import_role:
+        name: terraform
+        tasks_from: destroy

@@ -1,0 +1,3 @@
+---
+# https://releases.hashicorp.com/nomad/
+nomad_version: 0.9.0

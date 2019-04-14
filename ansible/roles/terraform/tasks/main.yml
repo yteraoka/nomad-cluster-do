@@ -1,0 +1,6 @@
+- name: terraform apply
+  terraform:
+    project_path: "../terraform"
+    state: present
+  tags:
+    - terraform

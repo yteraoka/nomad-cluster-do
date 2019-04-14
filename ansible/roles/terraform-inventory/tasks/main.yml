@@ -1,0 +1,22 @@
+---
+- name: download terraform-inventory.zip
+  get_url:
+    url: https://github.com/adammck/terraform-inventory/releases/download/v{{ terraform_inventory_version }}/terraform-inventory_v{{ terraform_inventory_version }}_{{ ansible_system | lower }}_amd64.zip
+    dest: /var/tmp/terraform-inventory-{{ terraform_inventory_version }}.zip
+  tags:
+    - terraform-inventory
+
+- name: unarchive terraform-inventory.zip
+  unarchive:
+    src: /var/tmp/terraform-inventory-{{ terraform_inventory_version }}.zip
+    dest: /var/tmp
+  tags:
+    - terraform-inventory
+
+- name: copy terraform-inventory
+  copy:
+    src: /var/tmp/terraform-inventory
+    dest: ../terraform-inventory
+    mode: "0755"
+  tags:
+    - terraform-inventory

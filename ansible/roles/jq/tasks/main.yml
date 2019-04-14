@@ -1,0 +1,12 @@
+---
+- name: install epel-release
+  yum:
+    name: epel-release
+  tags:
+    - jq
+
+- name: install jq
+  yum:
+    name: jq
+  tags:
+    - jq

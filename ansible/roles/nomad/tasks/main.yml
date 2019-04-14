@@ -1,0 +1,106 @@
+---
+- name: download nomad
+  get_url:
+    url: https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_amd64.zip
+    dest: /var/tmp/nomad-{{ nomad_version }}.zip
+  tags:
+    - nomad
+
+- name: unarchive nomad
+  unarchive:
+    src: /var/tmp/nomad-{{ nomad_version }}.zip
+    dest: /var/tmp
+    remote_src: yes
+  tags:
+    - nomad
+
+- name: install nomad
+  copy:
+    src: /var/tmp/nomad
+    dest: /usr/local/bin/nomad
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: yes
+  tags:
+    - nomad
+
+- name: mkdir /opt/nomad
+  file:
+    state: directory
+    path: /opt/nomad
+    owner: root
+    group: root
+    mode: "0755"
+  tags:
+    - nomad
+
+- name: mkdir /etc/nomad.d
+  file:
+    state: directory
+    path: /etc/nomad.d
+    owner: root
+    group: root
+    mode: "0700"
+  tags:
+    - nomad
+
+- name: copy nomad.hcl
+  template:
+    src: nomad.hcl
+    dest: /etc/nomad.d/nomad.hcl
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nomad
+  tags:
+    - nomad
+
+- name: copy server.hcl
+  template:
+    src: server.hcl
+    dest: /etc/nomad.d/server.hcl
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nomad
+  when:
+    - is_nomad_server
+  tags:
+    - nomad
+
+- name: copy client.hcl
+  template:
+    src: client.hcl
+    dest: /etc/nomad.d/client.hcl
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nomad
+  when:
+    - not is_nomad_server
+  tags:
+    - nomad
+
+- name: copy nomad.service
+  copy:
+    src: nomad.service
+    dest: /etc/systemd/system/nomad.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nomad
+  tags:
+    - nomad
+
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+  tags:
+    - nomad
+
+- name: enable nomad
+  service:
+    name: nomad
+    enabled: yes
+  tags:
+    - nomad

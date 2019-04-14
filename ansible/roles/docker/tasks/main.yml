@@ -1,0 +1,14 @@
+---
+- name: install docker
+  yum:
+    name: docker
+  tags:
+    - docker
+
+- name: enable and start docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  tags:
+    - docker

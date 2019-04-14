@@ -1,0 +1,44 @@
+---
+- name: download consul
+  get_url:
+    url: https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_{{ ansible_system | lower }}_amd64.zip
+    dest: /var/tmp/consul-{{ consul_version }}.zip
+  tags:
+    - consul-generate-files
+
+- name: unarchive consul
+  unarchive:
+    src: /var/tmp/consul-{{ consul_version }}.zip
+    dest: /var/tmp
+    remote_src: yes
+  tags:
+    - consul-generate-files
+
+- name: copy consul
+  copy:
+    src: /var/tmp/consul
+    dest: ../consul
+    mode: "0755"
+  tags:
+    - consul-generate-files
+
+- name: consul tls ca create
+  shell: test -f consul-agent-ca.pem || ../../consul tls ca create
+  args:
+    chdir: tls_files
+  tags:
+    - consul-generate-files
+
+- name: consul tls cert create -server
+  shell: test -f dc1-server-consul-0.pem || ../../consul tls cert create -server
+  args:
+    chdir: tls_files
+  tags:
+    - consul-generate-files
+
+- name: consul tls cert create -client
+  shell: test -f dc1-client-consul-0.pem || ../../consul tls cert create -client
+  args:
+    chdir: tls_files
+  tags:
+    - consul-generate-files

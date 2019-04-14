@@ -1,0 +1,13 @@
+- name: terraform
+  hosts: localhost
+  gather_facts: yes
+  connection: local
+  tasks:
+    - import_role:
+        name: consul-generate-files
+    - import_role:
+        name: terraform-inventory
+    - import_role:
+        name: genkey
+    - import_role:
+        name: terraform

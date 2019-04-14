@@ -1,0 +1,44 @@
+- name: setup consul server cluster
+  hosts: consul_server
+  become: yes
+  tasks:
+    - import_role:
+        name: consul
+      vars:
+        is_consul_server: true
+
+- name: setup cosul on nomad machines
+  hosts: all
+  become: yes
+  tasks:
+    - import_role:
+        name: jq
+    - import_role:
+        name: docker
+      when: "'nomad_client' in group_names"
+    - import_role:
+        name: consul
+      vars:
+        is_consul_server: false
+      when: "'nomad_server' in group_names or 'nomad_client' in group_names"
+
+
+- name: setup nomad servers
+  hosts: all
+  become: yes
+  tasks:
+    - import_role:
+        name: nomad
+      vars:
+        is_nomad_server: true
+      when: "'nomad_server' in group_names"
+
+- name: setup nomad clients
+  hosts: all
+  become: yes
+  tasks:
+    - import_role:
+        name: nomad
+      vars:
+        is_nomad_server: false
+      when: "'nomad_client' in group_names"
